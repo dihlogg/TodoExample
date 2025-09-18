@@ -1,4 +1,4 @@
-	import { NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
@@ -29,7 +29,7 @@ async function bootstrap() {
       urls: ['amqp://localhost:5672'],
       queue: 'todo_queue',
       queueOptions: {
-        durable: false,
+        durable: true,
       },
     },
   });
