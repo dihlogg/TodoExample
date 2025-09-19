@@ -16,6 +16,7 @@ export function useTodos() {
         const response = await fetch(API_ENDPOINTS.GET_ALL_TODOS);
         const data: Todo[] = await response.json();
         setTodos(data);
+        console.log("Current todos state:", data);
       } catch (err: any) {
         setError(err.message || "Failed to load todo");
       } finally {

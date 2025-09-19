@@ -9,11 +9,13 @@ import {
   UsePipes,
   ValidationPipe,
   Put,
+  Inject,
 } from '@nestjs/common';
 import { TodosService } from './todos.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { Todo } from './todo.schema';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Controller('ToDos')
 export class TodosController {
@@ -31,12 +33,12 @@ export class TodosController {
   async update(
     @Param('id') id: string,
     @Body() updateTodoDto: UpdateTodoDto,
-  ): Promise<boolean> {
+  ): Promise<Todo> {
     return this.todosService.update(id, updateTodoDto);
   }
+  
   @Post('PostTodo')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async create(@Body() createTodoDto: CreateTodoDto) {
+  async create(@Body(ValidationPipe) createTodoDto: CreateTodoDto) {
     return this.todosService.create(createTodoDto);
   }
 }

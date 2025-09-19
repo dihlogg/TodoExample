@@ -2,8 +2,8 @@ export interface Todo {
   id: string;
   title: string;
   description?: string;
-  priority: string;
+  priority: 'low' | 'medium' | 'high';
   isCompleted?: boolean;
-  createdAt: string;
+  createdAt: Date;
   completedAt?: string;
 }
