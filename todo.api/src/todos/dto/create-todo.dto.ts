@@ -1,10 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Priority } from '../todo.schema';
 
 export class CreateTodoDto {
   @IsString()
@@ -17,10 +19,10 @@ export class CreateTodoDto {
   @ApiProperty()
   description: string;
 
-  @IsString()
+  @IsEnum(Priority)
   @IsNotEmpty()
   @ApiProperty()
-  priority: string;
+  priority: Priority;
 
   @IsBoolean()
   @IsOptional()

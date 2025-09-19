@@ -4,8 +4,8 @@ import { TodosController } from './todos.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Todo, TodoSchema } from './todo.schema';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { TodoEventHandler } from './todo.event-handler';
 import { TodoGateway } from './todos.gateway';
+import { TodoProcessor } from './todos.processor';
 
 @Module({
   imports: [
@@ -24,8 +24,8 @@ import { TodoGateway } from './todos.gateway';
       },
     ]),
   ],
-  controllers: [TodosController],
-  providers: [TodosService, TodoEventHandler, TodoGateway],
-  exports: [TodosService],
+  controllers: [TodosController, TodoProcessor],
+  providers: [TodosService, TodoGateway],
+  exports: [TodosService, TodoGateway],
 })
 export class TodosModule {}
