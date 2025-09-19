@@ -14,15 +14,15 @@ class SocketService {
       });
 
       this.socket.on("connect", () => {
-        console.log("✅ Connected to WebSocket server");
+        console.log("Connected to WebSocket server");
       });
 
       this.socket.on("disconnect", () => {
-        console.log("❌ Disconnected from WebSocket server");
+        console.log("Disconnected from WebSocket server");
       });
 
       this.socket.on("connect_error", (error) => {
-        console.error("❌ Connection error:", error);
+        console.error("Connection error:", error);
       });
     }
 
@@ -33,7 +33,7 @@ class SocketService {
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
-      console.log("🔌 Socket disconnected");
+      console.log("Socket disconnected");
     }
   }
 
