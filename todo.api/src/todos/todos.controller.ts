@@ -3,19 +3,14 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
-  UsePipes,
   ValidationPipe,
-  Put,
-  Inject,
+  Patch,
 } from '@nestjs/common';
 import { TodosService } from './todos.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { Todo } from './todo.schema';
-import { ClientProxy } from '@nestjs/microservices';
 
 @Controller('ToDos')
 export class TodosController {
@@ -29,7 +24,7 @@ export class TodosController {
   async findOne(@Param('id') id: string): Promise<Todo> {
     return this.todosService.findOne(id);
   }
-  @Put('PutTodo/:id')
+  @Patch('PatchTodo/:id')
   async update(
     @Param('id') id: string,
     @Body() updateTodoDto: UpdateTodoDto,

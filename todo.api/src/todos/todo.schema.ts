@@ -10,9 +10,6 @@ export enum Priority {
 }
 @Schema({ timestamps: true }) // mongo tự generate createAt và updateAt
 export class Todo {
-  @Prop()
-  id?: string;
-
   @Prop({ required: true })
   title: string;
 

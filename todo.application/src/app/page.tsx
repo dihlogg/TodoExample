@@ -15,7 +15,7 @@ const { Option } = Select;
 interface CreateTodoForm {
   title: string;
   description: string;
-  priority: "low" | "medium" | "high" | "critical";
+  priority: "low" | "medium" | "high";
   isCompleted: boolean;
 }
 
@@ -27,6 +27,7 @@ export default function HomePage() {
     loading: todosLoading,
   } = useTodos();
   const { createTodo } = useCreateTodo();
+  const { updateTodo } = useUpdateTodo();
 
   // Local state
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -40,7 +41,7 @@ export default function HomePage() {
     title: "",
     description: "",
     priority: "low",
-    isCompleted: false
+    isCompleted: false,
   });
 
   // WebSocket setup
@@ -101,7 +102,7 @@ export default function HomePage() {
         title: form.title,
         description: form.description,
         priority: form.priority,
-        isCompleted: form.isCompleted
+        isCompleted: form.isCompleted,
       } as Todo);
 
       // Reset form
@@ -109,7 +110,7 @@ export default function HomePage() {
         title: "",
         description: "",
         priority: "low",
-        isCompleted: false
+        isCompleted: false,
       });
 
       message.success("Todo created successfully!");
@@ -117,6 +118,40 @@ export default function HomePage() {
       message.error(error.message || "Failed to create todo");
     } finally {
       setCreateLoading(false);
+    }
+  };
+
+  const handleCompleteTodo = async () => {
+    if (!selectedTodoId.trim()) {
+      message.error("Please enter a todo ID");
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const todoToUpdate = todos.find((t) => t.id === selectedTodoId);
+
+      if (!todoToUpdate) {
+        message.error("Todo not found");
+        return;
+      }
+
+      await updateTodo(selectedTodoId, {
+        isCompleted: true,
+      });
+
+      // Cập nhật local state để UI đồng bộ ngay
+      setTodos((prev) =>
+        prev.map((t) =>
+          t.id === selectedTodoId ? { ...t, isCompleted: true } : t
+        )
+      );
+
+      message.success("Todo marked as completed!");
+    } catch (err: any) {
+      message.error(err.message || "Failed to complete todo");
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -132,16 +167,16 @@ export default function HomePage() {
   };
 
   // Get priority color
-  const getPriorityColor = (priority: string) => {
-    switch (priority?.toLowerCase()) {
+  const getPriorityColor = (priority: string | undefined) => {
+    if (!priority) return "bg-gray-500";
+
+    switch (priority.toLowerCase()) {
       case "low":
         return "bg-green-500";
       case "medium":
         return "bg-yellow-500";
       case "high":
         return "bg-orange-500";
-      case "critical":
-        return "bg-red-500";
       default:
         return "bg-gray-500";
     }
@@ -228,7 +263,6 @@ export default function HomePage() {
                         <Option value="low">Low</Option>
                         <Option value="medium">Medium</Option>
                         <Option value="high">High</Option>
-                        <Option value="critical">Critical</Option>
                       </Select>
                     </div>
 
@@ -236,7 +270,7 @@ export default function HomePage() {
                     <button
                       onClick={handleCreateTodo}
                       disabled={createLoading || !form.title.trim()}
-                      className="w-full py-2 text-white font-semibold rounded-md bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full py-2 text-white font-semibold rounded-md bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
                       {createLoading ? "CREATING..." : "CREATE TODO"}
                     </button>
@@ -260,22 +294,22 @@ export default function HomePage() {
                         value={selectedTodoId}
                         onChange={(e) => setSelectedTodoId(e.target.value)}
                         placeholder="Enter todo uuid for actions"
-                        className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
+                        className="w-full !text-black px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
                       />
                     </div>
 
                     <div className="flex flex-row gap-x-6 items-start mb-4">
                       <button
-                        // onClick={handleCompleteTodo}
-                        disabled={actionLoading || !selectedTodoId.trim()}
-                        className="w-full py-2 text-white font-semibold rounded-md bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={handleCompleteTodo}
+                        disabled={actionLoading || !selectedTodoId?.trim()}
+                        className="w-full py-2 text-white font-semibold rounded-md bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                       >
                         {actionLoading ? "UPDATING..." : "COMPLETED"}
                       </button>
 
                       <button
                         onClick={handleRefresh}
-                        className="w-full py-2 text-white font-semibold rounded-md bg-gradient-to-r from-green-300 to-green-400 hover:from-green-400 hover:to-green-500 transition-all"
+                        className="w-full py-2 text-white font-semibold rounded-md bg-gradient-to-r from-green-300 to-green-400 hover:from-green-400 hover:to-green-500 transition-all cursor-pointer"
                       >
                         REFRESH
                       </button>
@@ -303,11 +337,12 @@ export default function HomePage() {
                         No todos yet. Create your first one!
                       </div>
                     ) : (
-                      <div className="max-h-96 overflow-y-auto space-y-3">
+                      <div className="max-h-96 overflow-y-auto space-y-3 ">
                         {todos.slice(0, 5).map((todo) => (
                           <div
                             key={todo.id}
-                            className="w-full bg-white px-3 py-2 rounded-xl shadow-md border-l-4 border-purple-500"
+                            onClick={() => setSelectedTodoId(todo.id)}
+                            className="w-full bg-white px-3 py-2 rounded-xl shadow-md border-l-4 border-purple-500 cursor-pointer"
                           >
                             <span className="text-base pt-2 font-bold text-gray-800 block">
                               {todo.title}
@@ -322,10 +357,15 @@ export default function HomePage() {
                               <div className="flex items-center gap-x-2">
                                 <span
                                   className={`px-2 py-1 text-xs font-semibold text-white rounded-full ${getPriorityColor(
-                                    todo.priority
+                                    todo?.priority // ← Thêm optional chaining here
                                   )}`}
                                 >
-                                  {todo.priority?.toUpperCase()}
+                                  {todo?.priority?.toUpperCase() || "UNKNOWN"}
+                                </span>
+                                <span className="text-xs font-semibold text-gray-500 block">
+                                  {todo.isCompleted
+                                    ? "Completed"
+                                    : "Not Completed"}
                                 </span>
                                 <span
                                   className={`px-2 py-1 text-xs font-semibold rounded-full ${
@@ -343,7 +383,8 @@ export default function HomePage() {
                             {/* ID - Clickable for easy copy */}
                             <span
                               className="text-xs text-gray-400 cursor-pointer hover:text-blue-600 transition-colors"
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 navigator.clipboard.writeText(todo.id);
                                 message.success("UUID copied to clipboard!");
                               }}

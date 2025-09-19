@@ -11,7 +11,7 @@ import {
 import { Server, Socket } from 'socket.io';
 
 @Injectable()
-@WebSocketGateway({ cors: { origin: '*' }, }) //open cors cho fe
+@WebSocketGateway({ cors: { origin: '*' } }) //open cors cho fe
 export class TodoGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
@@ -29,7 +29,7 @@ export class TodoGateway implements OnGatewayConnection, OnGatewayDisconnect {
       type: 'success',
       message: eventData.message,
       timestamp: new Date(),
-      todo: eventData.createdTodo
+      todo: eventData.createdTodo,
     });
   }
 
@@ -40,7 +40,7 @@ export class TodoGateway implements OnGatewayConnection, OnGatewayDisconnect {
       type: 'info',
       message: eventData.message,
       timestamp: new Date(),
-      todo: eventData.updatedTodo
+      todo: eventData.updatedTodo,
     });
   }
 
